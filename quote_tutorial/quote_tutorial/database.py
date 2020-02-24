@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Sequence, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Text, Date, Sequence, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from decouple import config
@@ -40,13 +40,22 @@ class Author(Base):
     __tablename__ = "author"
     id = Column(Integer, Sequence("author_id_seq"), primary_key=True, nullable=False)
     name = Column(String, nullable=True)
+    born_date = Column(Date, nullable=True)
+    born_location = Column(String, nullable=True)
+    description = Column(Text)
     quotes = relationship("Quote", back_populates="author")
+
+    def __repr__(self):
+        return f'<Author> {self.id} - {self.name}'
 
 class Quote(Base):
     __tablename__ = "quote"
     id = Column(Integer, Sequence("quote_id_seq"), primary_key=True, nullable=False)
-    title = Column(String, nullable=True)
+    content = Column(String, nullable=True)
     author_id = Column(ForeignKey("author.id", ondelete="CASCADE"), nullable=False)
     tags = Column(String, nullable=True)
     page = Column(Integer, nullable=True)
     author = relationship("Author", back_populates="quotes")
+
+    def __repr__(self):
+        return f'<Quote> {self.id} - {self.author.name}'

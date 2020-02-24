@@ -10,10 +10,12 @@ class QuoteTutorialPipeline(object):
     def __init__(self):
         self.db = db
         self.session = db.Session()
-        # db.drop_all()
+        db.drop_all()
         db.create_all()
 
-    def get_or_create(self, model, session=None, defaults=None, **kwargs):
+    def get_or_create(self, model, **kwargs):
+        print(f"GET OR CREATE > Author: {kwargs['name']}")
+
         session = self.session
         instance = session.query(model).filter_by(**kwargs).first()
         if instance:
@@ -25,10 +27,22 @@ class QuoteTutorialPipeline(object):
             return instance, True
 
     def save_item(self, item):
-        kwargs = {'name': item['author']}
-        author, created = self.get_or_create(Author,**kwargs)
+        print(f"Save Item Awal > Page: {item['page']}, Author: {item['author_name']}, {item['content']}")
+        kwargs = {
+            'name': item['author_name'],
+            'born_date': item['author_born_date'],
+            'born_location': item['author_born_location'],
+            'description': item['author_description']
+        }
+        author, created = self.get_or_create(Author, **kwargs)
+        print(author, created)
 
-        quote = Quote(title=item['title'], tags=', '.join(item['tags']), page=item['page'], author=author)
+        print(item.keys())
+        if 'tags' in item.keys():
+            quote = Quote(content=item['content'], tags=', '.join(item['tags']), page=item['page'], author=author)
+        else:
+            quote = Quote(content=item['content'], tags='', page=item['page'], author=author)
+        print(f"Save Item Akhir > Page: {item['page']}, Author: {item['author_name']}, {item['content']}")
         self.session.add(quote)
         self.session.commit()
         return quote
